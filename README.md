@@ -24,6 +24,7 @@ Since Uniswap v1 supports ether-token swaps. For that we need to create a ERC20 
 
 ### Exchange Contract:
 
-- Uniswap V1 has only two contracts: Factory and Exchange
-    - Factory contract is a registry contract that allows to create exchanges and keeps track of all deployed exchanges, allowing to  find exchange address with token address and vice-versa.
-    - Whereas, Exchange Contract actually defines exchanging logic. Each pair (eth-token) is deployed as an excahnge contract and allows to exchange ether to/from only one token.
+**Uniswap V1 has only two contracts: Factory and Exchange**
+
+* Factory contract is a registry contract that allows to create exchanges and keeps track of all deployed exchanges, allowing to  find exchange address with token address and vice-versa.
+* Whereas, Exchange Contract actually defines exchanging logic. Each pair (eth-token) is deployed as an excahnge contract and allows to exchange ether to/from only one token.
