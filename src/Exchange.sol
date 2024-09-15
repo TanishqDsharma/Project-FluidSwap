@@ -12,7 +12,7 @@ constructor(address _token){
     tokenAddress=_token;
 }
 
-function addLiquidity(uint256 _tokenAmount) public{
+function addLiquidity(uint256 _tokenAmount) public payable{
     IERC20 token = IERC20(tokenAddress);
     token.transferFrom(msg.sender,address(this),_tokenAmount);
 } 
