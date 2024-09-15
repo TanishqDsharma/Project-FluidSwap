@@ -13,8 +13,8 @@ address user = makeAddr("USER");
 
     function setUp() external{
         vm.prank(user);
-        token = new ERC20Token("Zswap","ZS",1000 ether);
-        vm.deal(user,1000 ether);
+        token = new ERC20Token("Zswap","ZS",10000 ether);
+        vm.deal(user,10000 ether);
         exchange = new Exchange(address(token));
     }
 
@@ -24,13 +24,28 @@ address user = makeAddr("USER");
     function testAddLiquidity() public {
         vm.startPrank(user);
         
-        //Allowing exchange contract to spend tokens on our behalf
+        // Allowing exchange contract to spend tokens on our behalf
         token.approve(address(exchange), type(uint256).max);
-
+        // Calling AddLiquidity to deposit 50 ether worth of tokens and 25 ether worth of eth 
         exchange.addLiquidity{value:25 ether}(50 ether);
+        // Confirming the contract has the 50 ether worth of tokens 
         assert(exchange.getReserve()==50 ether);
+        // Confirming the contract has the 25 ether worth of eth tokens 
         assert(address(exchange).balance==25 ether);
         vm.stopPrank();
+
+    }
+
+    function testPriceCalculation() public {
+        vm.startPrank(user);
+        token.approve(address(exchange),2000 ether);
+        exchange.addLiquidity{value:1000 ether}(2000 ether);
+        assert(exchange.getPrice(1000 ether,2000 ether)==500);
+        assert(exchange.getPrice(2000 ether,1000 ether)== 2000);
+
+        vm.stopPrank();
+
+
 
     }
 }
