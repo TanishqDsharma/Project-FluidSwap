@@ -44,6 +44,17 @@ function addLiquidity(uint256 _tokenAmount) public payable returns(uint256){
     }
 } 
 
+function removeLiquidity(uint256 _amount) public returns(uint256,uint256){
+    require(_amount > 0, "invalid amount");
+    uint256 ethAmount = (address(this).balance * _amount) / totalSupply();
+    uint256 tokenAmount = (getReserve() * _amount) / totalSupply();
+    _burn(msg.sender, _amount);
+    payable(msg.sender).transfer(ethAmount);
+    IERC20(tokenAddress).transfer(msg.sender, tokenAmount);
+
+    return (ethAmount, tokenAmount);
+}
+
 
 // Swapping Functions
 
@@ -84,8 +95,12 @@ function getAmount(
 ) private pure returns(uint256){
 
     require(inputReserve>0&&outputReserve>0,"Not enough in the Reserves");
-    return (inputAmount*inputReserve)/(inputReserve+inputAmount);
 
+    uint256 inputAmountWithFee = inputAmount*99;
+    uint256 numerator = inputAmountWithFee*outputReserve;
+    uint256 denominator =  (inputReserve * 100) + inputAmountWithFee;
+    
+    return numerator/denominator;
 }
 
 function getTokenAmount(
