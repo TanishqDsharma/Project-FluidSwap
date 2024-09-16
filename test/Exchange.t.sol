@@ -42,10 +42,16 @@ address user = makeAddr("USER");
         exchange.addLiquidity{value:1000 ether}(2000 ether);
         assert(exchange.getPrice(1000 ether,2000 ether)==500);
         assert(exchange.getPrice(2000 ether,1000 ether)== 2000);
+        vm.stopPrank();
+    }
 
+    function testAmountCalculation() public{
+        vm.startPrank(user);
+        token.approve(address(exchange),2000 ether);
+        exchange.addLiquidity{value:1000 ether}(2000 ether);
         vm.stopPrank();
 
-
-
+        console.log("Eth we are getting for selling 1 ether worth of tokens: ",exchange.getEthAmount(2 ether));
+        console.log("Token we are getting for selling 1 eth",exchange.getTokenAmount(1 ether));
     }
 }
