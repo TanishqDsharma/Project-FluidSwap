@@ -4,15 +4,21 @@ pragma solidity ^0.8.18;
 import {IERC20} from "../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
-
+interface IFactory {
+  function getExchange(address _tokenAddress) external returns (address);
+}
 
 contract Exchange is ERC20{
 
 address public tokenAddress;
+address public factoryAddress;
+
+
 
 constructor(address _token) ERC20("Zswap-V1", "ZSP"){
     require(_token!=address(0),"Invalid Token Address");
     tokenAddress=_token;
+    factoryAddress = msg.sender;  
 }
 
 function addLiquidity(uint256 _tokenAmount) public payable returns(uint256){
@@ -58,15 +64,41 @@ function removeLiquidity(uint256 _amount) public returns(uint256,uint256){
 
 // Swapping Functions
 
-function ethToTokenSwap(uint256 _minTokens) public payable{
-    // 1. Getting Token Reserve
-    uint256 tokenReserve = getReserve();
-    uint256 tokensBought = getAmount(msg.value,address(this).balance-msg.value,tokenReserve);
-    require(tokensBought>=_minTokens,"Insufficient Output Amount");
-    IERC20(tokenAddress).transfer(msg.sender,tokensBought);
+// function ethToTokenSwap(uint256 _minTokens) public payable{
+//     // 1. Getting Token Reserve
+//     uint256 tokenReserve = getReserve();
+//     uint256 tokensBought = getAmount(msg.value,address(this).balance-msg.value,tokenReserve);
+//     require(tokensBought>=_minTokens,"Insufficient Output Amount");
+//     IERC20(tokenAddress).transfer(msg.sender,tokensBought);
 
+// }
+
+/// @notice  it takes a tokens recipient address, which gives us the flexibility of choosing who we want to send tokens to
+/// @param recipient Pass the address of the recipient
+/// @param _minTokens Pass The Minimum Amount of Tokens that should be recieved
+
+function ethToToken(uint256 _minTokens, address recipient) private{
+    uint256 tokenReserve = getReserve();
+    uint256 tokensBought = getAmount(msg.value,address(this).balance - msg.value,tokenReserve);
+    require(tokensBought >= _minTokens, "insufficient output amount");
+    IERC20(tokenAddress).transfer(recipient, tokensBought);
 }
 
+
+/// @notice Simply a wrapper for ethToToken that always passes msg.sender as a recipient.
+/// @param _minTokens Pass The Minimum Amount of Tokens that should be recieved
+function ethToTokenSwap(uint256 _minTokens) public payable {
+  ethToToken(_minTokens, msg.sender);
+}
+
+
+/// @notice Simply a wrapper for ethToToken that always passes msg.sender as a recipient.
+/// @param _minTokens Pass The Minimum Amount of Tokens that should be recieved
+/// @param _recipient Pass the address of the recipient
+
+function ethToTokenTransfer(uint256 _minTokens, address _recipient)   public  payable {   
+    ethToToken(_minTokens, _recipient);
+}
 
 
 function TokenToETHSwap(uint256 _tokensSold,uint256 _minEth) public payable{
@@ -77,6 +109,26 @@ function TokenToETHSwap(uint256 _tokensSold,uint256 _minEth) public payable{
     IERC20(tokenAddress).transferFrom(msg.sender,address(this),_tokensSold);
     payable(msg.sender).transfer(ethBought);
 
+}
+
+
+/// @notice Explain to an end user what this does
+/// @dev Explain to a developer any extra details
+/// @param _tokensSold the amount of tokens to be sold
+/// @param _minTokensBought minimal amount of tokens to get in exchange,
+/// @param _tokenAddress  the address of the token to exchange sold tokens for
+
+function tokenToTokenSwap(
+    uint256 _tokensSold,
+    uint256 _minTokensBought,
+    address _tokenAddress
+) public{
+    address exchangeAddress = IFactory(factoryAddress).getExchange(_tokenAddress);
+    require(exchangeAddress != address(this) && exchangeAddress != address(0),"invalid exchange address");
+    uint256 tokenReserve = getReserve();
+    uint256 ethBought = getAmount(_tokensSold,tokenReserve,address(this).balance);
+    IERC20(tokenAddress).transferFrom(msg.sender,address(this),_tokensSold);
+    Exchange(exchangeAddress).ethToTokenTransfer{value: ethBought}(_minTokensBought,msg.sender);
 }
 
 function getPrice(
