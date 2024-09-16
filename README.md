@@ -64,9 +64,18 @@ So, the best solution is to have `No Fixed Supply`. Instead of giving out a set 
 
 Below equation shows how the amount of new LP-tokens is calculated depending on the amount of ethers deposited:
 
--> amountMinted=totalAmount∗ethReserve/ethDeposited
+amountMinted=totalAmount∗ethReserve/ethDeposited
 
 
-​
+# ​Fees
+
+We will collect fees for every swap that happens on the DEX. Fees will be paid in the currency of the asset that being traded. Liquidity providers get a balanced amount of ethers and tokens plus a share of accumulated fees proportional to the share of their LP-tokens.
+
+* Uniswap takes 0.3% in fees from each swap. For our project we will take 1% for seeing the differeneces in amount during testing.
+
+####  What is  Factory Contract?
  
+Factory contract serves as a registry of exchanges: Every new deployed contract is registered with a Factory.
+* Any exchange can be found by querying th registry.By having such registry exchanges can find other exchanges when user tries to swap a token for another token (and not ether).
+
 
