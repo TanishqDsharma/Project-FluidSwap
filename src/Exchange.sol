@@ -18,6 +18,29 @@ function addLiquidity(uint256 _tokenAmount) public payable{
 } 
 
 
+// Swapping Functions
+
+function ethToTokenSwap(uint256 _minTokens) public payable{
+    // 1. Getting Token Reserve
+    uint256 tokenReserve = getReserve();
+    uint256 tokensBought = getAmount(msg.value,address(this).balance-msg.value,tokenReserve);
+    require(tokensBought>=_minTokens,"Insufficient Output Amount");
+    IERC20(tokenAddress).transfer(msg.sender,tokensBought);
+
+}
+
+
+
+function TokenToETHSwap(uint256 _tokensSold,uint256 _minEth) public payable{
+    // 1. Getting Token Reserve
+    uint256 tokenReserve = getReserve();
+    uint256 ethBought = getAmount(_tokensSold,tokenReserve,address(this).balance);
+    require(ethBought>=_minEth,"Insufficient Output Amount");
+    IERC20(tokenAddress).transferFrom(msg.sender,address(this),_tokensSold);
+    payable(msg.sender).transfer(ethBought);
+
+}
+
 function getPrice(
     uint256 inputReserve, 
     uint256 outputReserve) public pure returns(uint256){
@@ -45,6 +68,16 @@ function getTokenAmount(
     uint256 tokenReserve = getReserve();
     return getAmount(_ethSold,tokenReserve,address(this).balance);
 }
+
+function getEthAmount(
+    uint256 _tokenSold
+) public view returns(uint256){
+    require(_tokenSold>0,"tokenSold is very small");
+    uint256 tokenReserve = getReserve();
+    return getAmount(_tokenSold,tokenReserve,address(this).balance);
+}
+
+
 
 function getReserve() public view returns(uint256){
     return IERC20(tokenAddress).balanceOf(address(this));
