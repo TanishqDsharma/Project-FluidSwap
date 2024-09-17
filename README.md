@@ -1,4 +1,4 @@
-# Project-ZSwap
+# Project-FluidSwap:v1
 
 **Description:** This project will focus on building clone of Uniswap V1. Uniswap is a decentralized exchange that aims to be an alternative for CEX.
 
