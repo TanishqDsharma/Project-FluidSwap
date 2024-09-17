@@ -15,7 +15,7 @@ address public factoryAddress;
 
 
 
-constructor(address _token) ERC20("Zswap-V1", "ZSP"){
+constructor(address _token) ERC20("FluidSwap:v1", "fluid"){
     require(_token!=address(0),"Invalid Token Address");
     tokenAddress=_token;
     factoryAddress = msg.sender;  
